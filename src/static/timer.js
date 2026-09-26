@@ -30,7 +30,7 @@ function start()
     timerId = setInterval(tick, 1000);
     ticking = true;
 
-    startButton.textContent = "pause";
+    startButton.textContent = "Pause";
 }
 
 function pause()
@@ -41,7 +41,7 @@ function pause()
         timerId = null;
         ticking = false;
 
-        startButton.textContent = "start";
+        startButton.textContent = "Start";
     }
 }
 
