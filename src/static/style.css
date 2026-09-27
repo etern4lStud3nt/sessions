@@ -42,6 +42,41 @@ h1
     font-size: xx-large;
 }
 
+.progress-bubbles
+{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+
+.bubble
+{
+    width: 12px;
+    height: 12px;
+    border: 2px solid;
+    border-radius: 50%;
+    box-sizing: border-box;
+    opacity: 0.2;
+}
+
+.bubble.break-bubble
+{
+    border-style: dashed;
+}
+
+.bubble.current
+{
+    background-color: currentColor;
+    opacity: 1;
+}
+
+.bubble.completed
+{
+    background-color: currentColor;
+    opacity: 0.45;
+}
+
 button
 {
     font-family: inherit;
