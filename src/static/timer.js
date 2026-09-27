@@ -4,12 +4,13 @@ let timer = INITIAL_TIME;
 let ticking = false;
 let timerId = null;
 
-let startButton = document.getElementById("start-button")
-let resetButton = document.getElementById("reset-button")
-let display = document.getElementById("display")
+let startButton = document.getElementById("start-button");
+let resetButton = document.getElementById("reset-button");
+let display = document.getElementById("display");
+let currentSession = "focus";
 
-startButton.addEventListener("click", startButtonHandler)
-resetButton.addEventListener("click", reset)
+startButton.addEventListener("click", startButtonHandler);
+resetButton.addEventListener("click", reset);
 
 
 function tick()
