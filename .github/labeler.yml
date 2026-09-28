@@ -1,0 +1,21 @@
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/static/**"
+          - "src/templates/**"
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/app.py"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "README.md"
+
+devops:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - "Dockerfile"
