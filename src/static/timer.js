@@ -2,7 +2,6 @@ const FOCUS_DURATION = 5;//25 * 60;
 const BREAK_DURATION = 2;//5 * 60;
 const TARGET_SESSIONS = 4;
 
-let ticking = false;
 let timerId = null;
 
 let timer = FOCUS_DURATION;
@@ -41,22 +40,20 @@ function tick()
 /** Starts the countdown interval if the timer is not already running. */
 function startTicking()
 {
-    if (ticking)
+    if (timerId !== null)
         return;
 
     timerId = setInterval(tick, 1000);
-    ticking = true;
 }
 
 /** Stops the countdown interval if it is running. */
 function stopTicking()
 {
-    if (!ticking)
+    if (timerId === null)
         return;
 
     clearInterval(timerId);
     timerId = null;
-    ticking = false;
 }
 
 
@@ -67,24 +64,24 @@ function start()
         sessionStartTime = new Date();
 
     startTicking();
-    updateDisplay("Pause");
+    updateDisplay();
 }
 
 /** Stops the countdown interval and changes the button to Start. */
 function pause()
 {
-    if (!ticking)
+    if (timerId === null)
         return;
 
     stopTicking();
     sessionPauseLogs.push([new Date(), null]);
 
-    updateDisplay("Start");
+    updateDisplay();
 }
 
 function unpause()
 {
-    if (ticking)
+    if (timerId !== null)
         return;
 
     const lastIndex = sessionPauseLogs.length - 1;
@@ -95,7 +92,7 @@ function unpause()
     }
 
     startTicking();
-    updateDisplay("Pause");
+    updateDisplay();
 }
 
 /** Returns true when there is an open pause interval awaiting a resume. */
@@ -115,7 +112,7 @@ function stop()
 /** Stops the timer and restores the default focus-session duration. */
 function reset()
 {
-    if (ticking)
+    if (timerId !== null)
         stopTicking();
 
     sessionPauseLogs = [];
@@ -125,14 +122,14 @@ function reset()
     timer = FOCUS_DURATION;
     sessionIndex = 1;
 
-    updateDisplay("Start");
+    updateDisplay();
 }
 //#endregion
 
 /** Toggles the timer between its running and paused states. */
 function handleStartButtonClick()
 {
-    if (ticking)
+    if (timerId !== null)
     {
         pause();
         return;
@@ -150,7 +147,7 @@ function handleStartButtonClick()
 
 
 /** Updates the displayed time using a zero-padded minutes-and-seconds format. */
-function updateDisplay(startButtonText = null)
+function updateDisplay()
 {
     let minutes = Math.floor(timer / 60);
     let seconds = timer % 60;
@@ -158,8 +155,7 @@ function updateDisplay(startButtonText = null)
     display.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     updateBubbles();
 
-    if (startButtonText !== null)
-        startButton.textContent = startButtonText;
+    startButton.textContent = timerId === null ? "Start" : "Pause";
 
     /** Updates the focus and break icons for the current session. */
     function updateBubbles()
@@ -175,10 +171,13 @@ function updateDisplay(startButtonText = null)
 
             if (index < sessionIndex)
                 sessionBubble.classList.add("completed");
-            else if (index === sessionIndex && session === "focus")
-                sessionBubble.classList.add("current");
-            else if (index === sessionIndex && session === "break")
-                sessionBubble.classList.add("completed", "break-bubble");
+            else if (index === sessionIndex)
+            {
+                if (session === "focus")
+                    sessionBubble.classList.add("current");
+                else
+                    sessionBubble.classList.add("completed", "break-bubble");
+            }
 
             progressBubbles.appendChild(sessionBubble);
         }
@@ -204,13 +203,41 @@ function switchSession()
         sessionIndex += 1;
     }
 
-    updateDisplay("Start");
+    updateDisplay();
+}
+
+async function logSession()
+{
+    try
+    {
+        const response = await fetch("/sessions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(
+                {
+                    sessionStartTime: sessionStartTime,
+                    session: session,
+                    sessionPauseLogs: sessionPauseLogs
+                }
+            )
+        });
+
+        if (!response.ok)
+            throw new Error(`Session log request failed: ${response.status}`);
+    }
+    catch (error)
+    {
+        console.error(error);
+    }
 }
 
 /** Switches phases or completes the session set after the target is reached. */
 function completeSession(stopped = false)
 {
     stopTicking();
+
+    // Log the session without blocking the timer transition.
+    logSession();
 
     if ((session === "focus" && sessionIndex >= TARGET_SESSIONS) || stopped)
     {
