@@ -107,6 +107,11 @@ button.danger
     border-color: crimson;
 }
 
+button.confirmation
+{
+    border-color: seagreen;
+}
+
 @media (prefers-reduced-motion: reduce)
 {
     button
