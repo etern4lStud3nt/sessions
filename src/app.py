@@ -18,7 +18,7 @@ try:
             type TEXT NOT NULL
                 CHECK (type IN ('focus', 'break', 'pause')),
             start_time TEXT NOT NULL,
-            end_time TEXT
+            end_time TEXT NOT NULL
         )
         """
     )
