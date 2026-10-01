@@ -1,15 +1,14 @@
 from pathlib import Path
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template, request
 import sqlite3
 
 app = Flask(__name__)
 
 database_path = Path("data/sessions.db")
 database_path.parent.mkdir(parents=True, exist_ok=True)
-db = sqlite3.connect(database_path)
 
-# Create the database if it doesn't exist
-try:
+
+with sqlite3.connect(database_path) as db:
     db.execute(
         """
         CREATE TABLE IF NOT EXISTS SESSIONS
@@ -22,14 +21,60 @@ try:
         )
         """
     )
-    db.commit()
-except Exception as error:
-    print(error)
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS PAUSES
+        (
+            id INTEGER PRIMARY KEY,
+            session_id INTEGER NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL,
+            FOREIGN KEY (session_id) REFERENCES SESSIONS(id)
+        )
+        """
+    )
 
 
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/sessions", methods=["POST"])
+def log_session():
+    data = request.get_json()
+    session_type = data["session"]
+    session_start_time = data["sessionStartTime"]
+    session_end_time = data["sessionEndTime"]
+    pause_logs = data.get("sessionPauseLogs", [])
+
+    with sqlite3.connect(database_path) as db:
+        session_id = db.execute(
+            """
+            INSERT INTO SESSIONS (type, start_time, end_time)
+            VALUES (?, ?, ?)
+            RETURNING id
+            """,
+            (session_type, session_start_time, session_end_time),
+        ).fetchone()[0]
+
+        for pause_start, pause_end in pause_logs:
+            db.execute(
+                """
+                INSERT INTO PAUSES (session_id, start_time, end_time)
+                VALUES (?, ?, ?)
+                """,
+                (session_id, pause_start, pause_end),
+            )
+
+        db.commit()
+
+        sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
+        pauses = db.execute("SELECT * FROM PAUSES").fetchall()
+
+    return jsonify({
+        "sessions": sessions,
+        "pauses": pauses,
+    }), 201
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

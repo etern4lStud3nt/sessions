@@ -285,6 +285,10 @@ async function logSession()
 
         if (!response.ok)
             throw new Error(`Session log request failed: ${response.status}`);
+
+        const loggedData = await response.json();
+
+        console.log("Logged data:", loggedData);
     }
     catch (error)
     {
