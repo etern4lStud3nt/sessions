@@ -15,6 +15,8 @@ const state = {
     phase: "focus",
     /** Start time of the current focus session, or null when it has not started. */
     startTime: null,
+    /** End time of the current session, or null when it has not ended. */
+    endTime: null,
     /** Start and end timestamps for pauses in the current session. */
     pauseLogs: []
 };
@@ -94,6 +96,7 @@ function stopTicking()
 function start()
 {
     state.startTime = new Date();
+    state.endTime = null;
     startTicking();
     updateDisplay();
 }
@@ -147,6 +150,7 @@ function resetSet()
 
     state.pauseLogs = [];
     state.startTime = null;
+    state.endTime = null;
     state.phase = "focus";
     state.remaining = FOCUS_DURATION;
     state.sessionIndex = 1;
@@ -245,6 +249,7 @@ function updateProgressBubbles()
 function switchSession()
 {
     state.startTime = null;
+    state.endTime = null;
 
     if (state.phase === "focus")
     {
@@ -271,6 +276,7 @@ async function logSession()
             body: JSON.stringify(
                 {
                     sessionStartTime: state.startTime,
+                    sessionEndTime: state.endTime,
                     session: state.phase,
                     sessionPauseLogs: state.pauseLogs
                 }
@@ -291,6 +297,7 @@ function completeSession(stopped = false)
 {
     // Stop the timer
     stopTicking();
+    state.endTime = new Date();
 
     // Close last pause log if necessary
     const lastPause = state.pauseLogs.at(-1);
