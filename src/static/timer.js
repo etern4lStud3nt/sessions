@@ -1,5 +1,5 @@
-const FOCUS_DURATION = 5;//25 * 60;
-const BREAK_DURATION = 2;//5 * 60;
+const FOCUS_DURATION = 25 * 60;
+const BREAK_DURATION = 5 * 60;
 const TARGET_SESSIONS = 4;
 
 
