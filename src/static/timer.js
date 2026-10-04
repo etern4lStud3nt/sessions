@@ -131,7 +131,7 @@ function unpause()
 
 function stop()
 {
-    if(!hasStartedSession() && state.sessionIndex == 1)
+    if(!hasStartedSession() && state.sessionIndex == 1 && state.phase === "focus")
     {
         alert("No session has started yet.");
         return;
