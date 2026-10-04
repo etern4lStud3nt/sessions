@@ -1,8 +1,12 @@
 from pathlib import Path
 from flask import Flask, jsonify, render_template, request
+from utils.jinja_filters import get_date_diff, get_natural_date
 import sqlite3
 
+
 app = Flask(__name__)
+app.jinja_env.filters["get_date_diff"] = get_date_diff
+app.jinja_env.filters["get_natural_date"] = get_natural_date
 
 database_path = Path("data/sessions.db")
 database_path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,6 +79,13 @@ def log_session():
         "sessions": sessions,
         "pauses": pauses,
     }), 201
+    
+@app.route("/history", methods=["GET"])
+def history():
+    with sqlite3.connect(database_path) as db:
+        sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
+        # Get pauses as well in the future        
+    return render_template("history.html", sessions=sessions)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
