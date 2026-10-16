@@ -1,333 +1,88 @@
-const FOCUS_DURATION = 25 * 60;
-const BREAK_DURATION = 5 * 60;
-const TARGET_SESSIONS = 4;
 
-
-/** Stores the timer's current phase, countdown progress, session number, and pause history. */
-const state = {
-    /** Active countdown interval identifier, or null when the timer is stopped. */
-    timerId: null,
-    /** Seconds remaining in the current focus or break phase. */
-    remaining: FOCUS_DURATION,
-    /** One-based number of the current focus session. */
-    sessionIndex: 1,
-    /** Current phase: "focus", "break", or null when no session is active. */
-    phase: "focus",
-    /** Start time of the current focus session, or null when it has not started. */
-    startTime: null,
-    /** End time of the current session, or null when it has not ended. */
-    endTime: null,
-    /** Start and end timestamps for pauses in the current session. */
-    pauseLogs: []
-};
-
-// Get document elements
-const startButton = document.getElementById("start-button");
-const stopButton = document.getElementById("stop-button");
-const resetButton = document.getElementById("reset-button");
-const display = document.getElementById("display");
-const progressBubbles = document.getElementById("progress-bubbles");
-startButton.addEventListener("click", handleStartButtonClick);
-stopButton.addEventListener("click", stop);
-resetButton.addEventListener("click", resetSet);
-
-/** Returns true when the countdown interval is running. */
-function isRunning()
+/**
+ * Maintains countdown state and emits a `finished` event when it reaches zero.
+ */
+export default class Timer 
 {
-    return state.timerId !== null;
-}
+    #duration;
+    #remaining;
+    #intervalId;
+    #eventTarget;
 
-/** Returns true when a focus or break phase is active but paused. */
-function isPaused()
-{
-    return state.phase !== null && !isRunning();
-}
-
-/** Returns true when the timer is in a focus or break phase. */
-function hasActiveSession()
-{
-    return state.phase !== null;
-}
-
-/** Returns true when Start() has been called once in this session and startTime is not null */
-function hasStartedSession()
-{
-    return state.startTime != null;
-}
-
-updateDisplay();
-
-//#region Ticking, Start, Pause, Stop, Reset
-/** Decrements the timer and resets it when the countdown completes. */
-function tick()
-{
-    state.remaining -= 1;
-    updateDisplay();
-
-    if (state.remaining <= 0)
+    /**
+     * Creates a timer.
+     * @param {number} duration Duration in seconds.
+     */
+    constructor(duration)
     {
-        completeSession();
-        return;
-    }
-}
-
-
-/** Starts the countdown interval if the timer is not already running. */
-function startTicking()
-{
-    if (isRunning())
-        return;
-
-    state.timerId = setInterval(tick, 1000);
-}
-
-/** Stops the countdown interval if it is running. */
-function stopTicking()
-{
-    if (!isRunning())
-        return;
-
-    clearInterval(state.timerId);
-    state.timerId = null;
-}
-
-
-/** Starts the set and countdown interval and changes the button to Pause. */
-function start()
-{
-    state.startTime = new Date();
-    state.endTime = null;
-    startTicking();
-    updateDisplay();
-}
-
-/** Stops the countdown interval and changes the button to Start. */
-function pause()
-{
-    if (!isRunning())
-        return;
-
-    stopTicking();
-    state.pauseLogs.push([new Date(), null]);
-
-    updateDisplay();
-}
-
-function unpause()
-{
-    if (isRunning() || !hasActiveSession())
-        return;
-
-    const lastIndex = state.pauseLogs.length - 1;
-
-    if (lastIndex >= 0 && state.pauseLogs[lastIndex][1] === null)
-    {
-        state.pauseLogs[lastIndex][1] = new Date();
+        this.#duration = duration;
+        this.#remaining = duration;
+        this.#intervalId = null;
+        this.#eventTarget = new EventTarget();
     }
 
-    startTicking();
-    updateDisplay();
-}
-
-function stop()
-{
-    if(!hasStartedSession() && state.sessionIndex == 1 && state.phase === "focus")
+    /** @returns {number} The configured duration in seconds. */
+    get duration()
     {
-        alert("No session has started yet.");
-        return;
+        return this.#duration;
     }
 
-    stopTicking();
-    completeSession(true);
-}
-
-
-/** Stops the timer and restores the default focus-session duration. */
-function resetSet()
-{
-    if (isRunning())
-        stopTicking();
-
-    state.pauseLogs = [];
-    state.startTime = null;
-    state.endTime = null;
-    state.phase = "focus";
-    state.remaining = FOCUS_DURATION;
-    state.sessionIndex = 1;
-
-    updateDisplay();
-}
-//#endregion
-
-/** Toggles the timer between its running and paused states. */
-function handleStartButtonClick()
-{
-    if(!hasActiveSession())
-        return;
-
-    if (hasStartedSession())
+    /** @returns {number} The remaining time in seconds. */
+    get remaining()
     {
-        if (isPaused())
+        return this.#remaining;
+    }
+
+    /**
+     * @returns {EventTarget} The target used to listen for timer events.
+     * @example timer.eventTarget.addEventListener('finished', handler)
+     */
+    get eventTarget()
+    {
+        return this.#eventTarget;
+    }
+
+    /** Advances the countdown by one second while the timer is running. */
+    tick()
+    {
+        if(this.#intervalId != null)
         {
-            unpause();
-        }
-        else
-        {
-            pause();
+            this.#remaining -= 1;
+            this.#eventTarget.dispatchEvent(new Event("tick"));
+
+            if(this.#remaining <= 0)
+            {
+                this.pause();
+                this.#eventTarget.dispatchEvent(new Event("finished"));
+            }
         }
     }
-    else
+
+    /** Starts the timer if it is not already running. */
+    start()
     {
-        start();
-    }
-}
-
-
-/** Updates the displayed time using a zero-padded minutes-and-seconds format. */
-function updateDisplay()
-{
-    updateTimerDisplay();
-    updateProgressBubbles();
-    updateStartButton();
-}
-
-function updateTimerDisplay()
-{
-    const minutes = Math.floor(state.remaining / 60);
-    const seconds = state.remaining % 60;
-
-    display.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-function updateStartButton()
-{
-    if(!hasActiveSession())
-        return;
-
-    if (!hasStartedSession())
-    {
-        startButton.textContent = "Start";
-    }
-    else if (isPaused())
-    {
-        startButton.textContent = "Resume";
-    }
-    else
-    {
-        startButton.textContent = "Pause";
-    }
-}
-
-function updateProgressBubbles()
-{
-    progressBubbles.replaceChildren();
-
-    for (let index = 1; index <= TARGET_SESSIONS; index += 1)
-    {
-        const sessionBubble = document.createElement("span");
-
-        sessionBubble.classList.add("bubble", "focus-bubble");
-        sessionBubble.setAttribute("aria-label", `Focus session ${index}`);
-
-        if (index < state.sessionIndex)
-            sessionBubble.classList.add("completed");
-        else if (index === state.sessionIndex)
+        if(this.#intervalId != null)
         {
-            if (state.phase === "focus")
-                sessionBubble.classList.add("current");
-            else if (state.phase === "break")
-                sessionBubble.classList.add("completed", "break-bubble");
+            return; // Timer is already running
         }
 
-        progressBubbles.appendChild(sessionBubble);
+        this.#intervalId = setInterval(this.tick.bind(this), 1000);
     }
-}
 
-
-
-/** Switches from the focus session to the break session. */
-function switchSession()
-{
-    state.startTime = null;
-    state.endTime = null;
-
-    if (state.phase === "focus")
+    /** Pauses the timer without resetting the remaining time. */
+    pause()
     {
-        state.phase = "break";
-        state.remaining = BREAK_DURATION;
+        if(this.#intervalId == null)
+            return; // Timer is not running
+
+        clearInterval(this.#intervalId);
+        this.#intervalId = null;
     }
-    else if (state.phase === "break")
+
+    /** Resets the timer to its original duration. */
+    reset()
     {
-        state.phase = "focus";
-        state.remaining = FOCUS_DURATION;
-        state.sessionIndex += 1;
+        this.pause();
+        this.#remaining = this.#duration;
     }
-
-    updateDisplay();
-}
-
-async function logSession()
-{
-    try
-    {
-        const response = await fetch("/sessions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(
-                {
-                    sessionStartTime: state.startTime,
-                    sessionEndTime: state.endTime,
-                    session: state.phase,
-                    sessionPauseLogs: state.pauseLogs
-                }
-            )
-        });
-
-        if (!response.ok)
-            throw new Error(`Session log request failed: ${response.status}`);
-
-        const loggedData = await response.json();
-
-        console.log("Logged data:", loggedData);
-    }
-    catch (error)
-    {
-        console.error(error);
-    }
-}
-
-/** Switches phases or completes the session set after the target is reached. */
-function completeSession(stopped = false)
-{
-    // Stop the timer
-    stopTicking();
-    state.endTime = new Date();
-
-    // Close last pause log if necessary
-    const lastPause = state.pauseLogs.at(-1);
-    if (lastPause?.[1] === null)
-        lastPause[1] = new Date();
-
-    // Log the session without blocking the timer transition.
-    void logSession();
-
-    // Reset pause logs
-    state.pauseLogs = [];
-
-    if ((state.phase === "focus" && state.sessionIndex >= TARGET_SESSIONS) || stopped)
-    {
-        completeSet();
-    }
-    else
-    {
-        switchSession();
-    }
-}
-
-
-function completeSet()
-{
-    // Congratulate user and reset
-    alert(`Congratulations! You reached ${state.sessionIndex} out of ${TARGET_SESSIONS} focus sessions.`);
-    resetSet();
 }
