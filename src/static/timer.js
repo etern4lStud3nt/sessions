@@ -45,12 +45,12 @@ export default class Timer
     /** Advances the countdown by one second while the timer is running. */
     tick()
     {
-        if(this.#intervalId != null)
+        if (this.#intervalId != null)
         {
             this.#remaining -= 1;
             this.#eventTarget.dispatchEvent(new Event("tick"));
 
-            if(this.#remaining <= 0)
+            if (this.#remaining <= 0)
             {
                 this.pause();
                 this.#eventTarget.dispatchEvent(new Event("finished"));
@@ -61,7 +61,7 @@ export default class Timer
     /** Starts the timer if it is not already running. */
     start()
     {
-        if(this.#intervalId != null)
+        if (this.#intervalId != null)
         {
             return; // Timer is already running
         }
@@ -72,7 +72,7 @@ export default class Timer
     /** Pauses the timer without resetting the remaining time. */
     pause()
     {
-        if(this.#intervalId == null)
+        if (this.#intervalId == null)
             return; // Timer is not running
 
         clearInterval(this.#intervalId);

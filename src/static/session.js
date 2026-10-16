@@ -20,11 +20,12 @@ export default class Session
     /**
      * Creates a session.
      * @param {"focus"|"break"} type The type of session to create.
+    * @param {number} duration The session duration in seconds.
      */
-    constructor(type)
+    constructor(type, duration)
     {
         this.#type = type;
-        this.#duration = type === "focus" ? FOCUS_DURATION : BREAK_DURATION;
+        this.#duration = duration;
         this.#timer = new Timer(this.#duration);
         this.#state = "NOT_STARTED"
         this.#eventTarget = new EventTarget();

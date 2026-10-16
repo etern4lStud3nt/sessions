@@ -1,11 +1,9 @@
 import * as app from "./app.js"
 
-// Controls for starting, stopping, and resetting the current set. 
+// Get document elements
 const startButton = document.getElementById("start-button");
 const stopButton = document.getElementById("stop-button");
 const resetButton = document.getElementById("reset-button");
-
-// Elements used to display the current timer and set progress.
 const display = document.getElementById("display");
 const progressBubbles = document.getElementById("progress-bubbles");
 

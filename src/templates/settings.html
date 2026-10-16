@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<title>Settings</title>
+<script type="module" src="{{ url_for('static', filename='settings.js') }}" defer></script>
+{% endblock %}
+
+{% block main %}
+<div class="main-div">
+    <h1>Settings</h1>
+    <form id="settings-form" action="{{ url_for('settings') }}" method="POST">
+        <fieldset>
+            <legend>Session Durations</legend>
+
+            <div class="setting-row">
+                <label for="focus-duration-min">Focus Duration</label>
+                <input type="number" name="focus-duration" id="focus-duration-min">
+                <span>minutes</span>
+                <input type="number" name="focus-duration" id="focus-duration-sec">
+                <span>seconds</span>
+            </div>
+
+            <div class="setting-row">
+                <label for="break-duration-min">Break Duration</label>
+                <input type="number" name="break-duration" id="break-duration-min">
+                <span>minutes</span>
+                <input type="number" name="break-duration" id="break-duration-sec">
+                <span>seconds</span>
+            </div>
+        </fieldset>
+        <button type="submit" id="submit">Save Settings</button>
+    </form>
+    <a href="{{ url_for('home') }}">Home</a>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect
 from utils.jinja_filters import get_date_diff, get_natural_date
 import sqlite3
 
@@ -86,6 +86,13 @@ def history():
         sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
         # Get pauses as well in the future        
     return render_template("history.html", sessions=sessions)
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if request.method == "GET":
+        return render_template("settings.html")
+    elif request.method == "POST":
+        return redirect("/")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

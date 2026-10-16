@@ -1,4 +1,5 @@
 import Session from "./session.js";
+import { getDuration } from "./durations.js";
 
 /** The highest session index in a set. */
 const maxIndex = 3;
@@ -17,7 +18,8 @@ let eventTarget = new EventTarget();
  */
 function createSession(type)
 {
-    let session = new Session(type);
+    let duration = getDuration(type);
+    let session = new Session(type, duration);
     session.eventTarget.addEventListener("update", () => eventTarget.dispatchEvent(new Event("update")));
     session.eventTarget.addEventListener("finished", handleSessionFinished);
     return session;

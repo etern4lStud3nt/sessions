@@ -9,93 +9,6 @@ body
     font-family: 'montserrat', 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
 }
 
-table 
-{
-    width: max-content;
-    max-width: 100%;
-    border-collapse: collapse;
-}
-
-th, td 
-{
-    padding: 10px 14px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-.main-div
-{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.main-div > a
-{
-    align-self: flex-start;
-}
-
-.timer
-{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 2px dashed;
-    border-radius: 15px;
-    padding: 20px;
-    gap: 5px;
-    margin-bottom: 10px;
-    width: 220px;
-    box-sizing: border-box;
-}
-
-h1
-{
-    align-self: flex-start;
-}
-
-#display
-{
-    margin-bottom: 5px;
-    font-size: xx-large;
-}
-
-.progress-bubbles
-{
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 5px;
-}
-
-.bubble
-{
-    width: 12px;
-    height: 12px;
-    border: 2px solid;
-    border-radius: 50%;
-    box-sizing: border-box;
-    opacity: 0.2;
-}
-
-.bubble.break-bubble
-{
-    border-style: dashed;
-}
-
-.bubble.current
-{
-    background-color: currentColor;
-    opacity: 1;
-}
-
-.bubble.completed
-{
-    background-color: currentColor;
-    opacity: 0.45;
-}
-
 button
 {
     font-family: inherit;
@@ -120,6 +33,134 @@ button:active
     transform: translateY(0px) scale(0.97);
 }
 
+fieldset
+{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form
+{
+    gap: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form input[type="number"]
+{
+    font-family: inherit;
+    font-size: inherit;
+    background-color: transparent;
+    border: 2px solid;
+    border-radius: 5px;
+    box-sizing: border-box;
+    width: 4em;
+    outline: 2px solid transparent;
+    transition: outline-color 0.3s ease;
+}
+
+form input[type="number"]:focus
+{
+    outline-color: dodgerblue;
+    border-color: dodgerblue;
+}
+
+h1
+{
+    align-self: flex-start;
+}
+
+table
+{
+    width: max-content;
+    max-width: 100%;
+    border-collapse: collapse;
+}
+
+th, td
+{
+    padding: 10px 14px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.bubble
+{
+    width: 12px;
+    height: 12px;
+    border: 2px solid;
+    border-radius: 50%;
+    box-sizing: border-box;
+    opacity: 0.2;
+}
+
+.bubble.break-bubble
+{
+    border-style: dashed;
+}
+
+.bubble.completed
+{
+    background-color: currentColor;
+    opacity: 0.45;
+}
+
+.bubble.current
+{
+    background-color: currentColor;
+    opacity: 1;
+}
+
+.main-div
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.main-div > a
+{
+    align-self: flex-start;
+}
+
+.progress-bubbles
+{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+
+.timer
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px dashed;
+    border-radius: 15px;
+    padding: 20px;
+    gap: 5px;
+    margin-bottom: 10px;
+    width: 220px;
+    box-sizing: border-box;
+}
+
+.setting-row 
+{
+    display: grid;
+    grid-template-columns: 1fr 4em auto 4em auto;
+    align-items: center;
+    column-gap: 5px;
+}
+
+#display
+{
+    margin-bottom: 5px;
+    font-size: xx-large;
+}
 
 button.danger
 {
@@ -129,12 +170,4 @@ button.danger
 button.confirmation
 {
     border-color: seagreen;
-}
-
-@media (prefers-reduced-motion: reduce)
-{
-    button
-    {
-        transition: none;
-    }
 }
