@@ -1,14 +1,18 @@
 import Session from "./session.js";
 
+/** The highest session index in a set. */
 const maxIndex = 3;
+/** The index of the currently active session in the set. */
 let index = 0;
+/** The active focus or break session. */
 let session = createSession("focus");
+/** Emits updates whenever the active session changes. */
 let eventTarget = new EventTarget();
 
 
 /**
  * Creates a new session and adds event listeners
- * @param {"focus|break"} type The type of session to create
+ * @param {"focus"|"break"} type The type of session to create
  * @returns {Session} The created session
  */
 function createSession(type)
@@ -19,11 +23,13 @@ function createSession(type)
     return session;
 }
 
+/** Starts the active session. */
 function startSession()
 {
     session.start();
 }
 
+/** Pauses the active session or resumes it when it is paused. */
 function togglePauseSession()
 {
     if (session.state === "PAUSED")
@@ -32,6 +38,7 @@ function togglePauseSession()
         session.pause();
 }
 
+/** Sends the active session's timing and pause data to the server. */
 async function logSession()
 {
     console.log("logging session...")
@@ -63,6 +70,7 @@ async function logSession()
     }
 }
 
+/** Logs a completed session and advances or resets the current set. */
 function handleSessionFinished()
 {
     void logSession();
@@ -92,6 +100,7 @@ function handleSessionFinished()
     }
 }
 
+/** Stops and logs the active session, then resets the set. */
 function stopSet()
 {
     session.stop();
@@ -100,6 +109,7 @@ function stopSet()
     resetSet();
 }
 
+/** Replaces the active session with a new focus session. */
 function resetSet()
 {
     index = 0;

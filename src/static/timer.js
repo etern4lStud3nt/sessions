@@ -1,6 +1,6 @@
 
 /**
- * A countdown timer that emits a `finished` event when it reaches zero.
+ * Maintains countdown state and emits a `finished` event when it reaches zero.
  */
 export default class Timer 
 {
@@ -42,9 +42,7 @@ export default class Timer
         return this.#eventTarget;
     }
 
-    /**
-     * Decreases the remaining time by one second and emits `finished` at zero.
-     */
+    /** Advances the countdown by one second while the timer is running. */
     tick()
     {
         if(this.#intervalId != null)
@@ -88,4 +86,3 @@ export default class Timer
         this.#remaining = this.#duration;
     }
 }
-

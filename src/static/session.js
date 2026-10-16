@@ -139,6 +139,7 @@ export default class Session
         this.#eventTarget.dispatchEvent(new Event("update"));
     }
 
+    /** Stops the session, closes any pause interval, and records its end time. */
     stop()
     {
         this.closePauseInterval();
@@ -161,7 +162,7 @@ export default class Session
         this.#eventTarget.dispatchEvent(new Event("update"));
     }
 
-    /** Marks the session as finished and dispatches completion events. */
+    /** Marks the session finished when its timer reaches zero. */
     handleTimerFinished()
     {
         this.#endTime = new Date();
