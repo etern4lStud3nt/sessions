@@ -11,6 +11,7 @@ startButton.addEventListener("click", handleStartButtonClick);
 stopButton.addEventListener("click", handleStopButtonClick);
 resetButton.addEventListener("click", handleResetButtonClick);
 
+app.eventTarget.addEventListener("update", updateDisplay);
 updateDisplay();
 
 function handleStartButtonClick()
@@ -18,12 +19,13 @@ function handleStartButtonClick()
     if (app.session.state === "NOT_STARTED")
     {
         app.startSession();
-        app.session.eventTarget.addEventListener("update", updateDisplay)
     }
     else
     {
         app.togglePauseSession();
     }
+
+    updateDisplay();
 }
 
 function handleStopButtonClick()
@@ -35,6 +37,7 @@ function handleStopButtonClick()
 function handleResetButtonClick()
 {
     app.resetSet();
+
     updateDisplay();
 }
 

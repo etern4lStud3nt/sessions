@@ -1,13 +1,27 @@
 import Session from "./session.js";
 
-let index = 0;
 const maxIndex = 3;
-let session = new Session("focus");
+let index = 0;
+let session = createSession("focus");
+let eventTarget = new EventTarget();
+
+
+/**
+ * Creates a new session and adds event listeners
+ * @param {"focus|break"} type The type of session to create
+ * @returns {Session} The created session
+ */
+function createSession(type)
+{
+    let session = new Session(type);
+    session.eventTarget.addEventListener("update", () => eventTarget.dispatchEvent(new Event("update")));
+    session.eventTarget.addEventListener("finished", handleSessionFinished);
+    return session;
+}
 
 function startSession()
 {
     session.start();
-    session.eventTarget.addEventListener("finished", handleSessionFinished);
 }
 
 function togglePauseSession()
@@ -53,16 +67,17 @@ function handleSessionFinished()
 {
     void logSession();
 
+
     // If the set hasn't finished, move to the next session
     if (index < maxIndex)
     {
         if (session.type === "break")
         {
-            session = new Session("focus");
+            session = createSession("focus");
             index += 1;
         }
         else if (session.type === "focus")
-            session = new Session("break")
+            session = createSession("break")
     }
     // If a session with maxIndex finished, reset
     else
@@ -73,7 +88,7 @@ function handleSessionFinished()
             resetSet();
         }
         else if (session.type === "focus")
-            session = new Session("break")
+            session = createSession("break")
     }
 }
 
@@ -88,10 +103,12 @@ function stopSet()
 function resetSet()
 {
     index = 0;
-    session = new Session("focus");
+    session = createSession("focus");
 }
 
-export {
+export
+{
+    eventTarget,
     index, maxIndex, session,
     startSession, togglePauseSession,
     stopSet, resetSet
