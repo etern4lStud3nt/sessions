@@ -9,7 +9,7 @@ body
     font-family: 'montserrat', 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
 }
 
-button
+button, input
 {
     font-family: inherit;
     font-size: inherit;
@@ -67,7 +67,7 @@ form input[type="number"]:focus
     border-color: dodgerblue;
 }
 
-h1
+h1, h2
 {
     align-self: flex-start;
 }
