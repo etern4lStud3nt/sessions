@@ -12,7 +12,8 @@ database_path = Path("data/sessions.db")
 database_path.parent.mkdir(parents=True, exist_ok=True)
 
 
-with sqlite3.connect(database_path) as db:
+db = sqlite3.connect(database_path)
+try:
     db.execute(
         """
         CREATE TABLE IF NOT EXISTS SESSIONS
@@ -37,54 +38,78 @@ with sqlite3.connect(database_path) as db:
         )
         """
     )
+    db.commit()
+finally:
+    db.close()
 
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-@app.route("/sessions", methods=["POST"])
-def log_session():
-    data = request.get_json()
-    session_type = data["session"]
-    session_start_time = data["sessionStartTime"]
-    session_end_time = data["sessionEndTime"]
-    pause_logs = data.get("sessionPauseLogs", [])
+@app.route("/sessions", methods=["POST", "GET"])
+def sessions():
+    if request.method == "POST":
+        data = request.get_json()
+        session_type = data["session"]
+        session_start_time = data["sessionStartTime"]
+        session_end_time = data["sessionEndTime"]
+        pause_logs = data.get("sessionPauseLogs", [])
 
-    with sqlite3.connect(database_path) as db:
-        session_id = db.execute(
-            """
-            INSERT INTO SESSIONS (type, start_time, end_time)
-            VALUES (?, ?, ?)
-            RETURNING id
-            """,
-            (session_type, session_start_time, session_end_time),
-        ).fetchone()[0]
-
-        for pause_start, pause_end in pause_logs:
-            db.execute(
+        db = sqlite3.connect(database_path)
+        try:
+            session_id = db.execute(
                 """
-                INSERT INTO PAUSES (session_id, start_time, end_time)
+                INSERT INTO SESSIONS (type, start_time, end_time)
                 VALUES (?, ?, ?)
+                RETURNING id
                 """,
-                (session_id, pause_start, pause_end),
-            )
+                (session_type, session_start_time, session_end_time),
+            ).fetchone()[0]
 
-        db.commit()
+            for pause_start, pause_end in pause_logs:
+                db.execute(
+                    """
+                    INSERT INTO PAUSES (session_id, start_time, end_time)
+                    VALUES (?, ?, ?)
+                    """,
+                    (session_id, pause_start, pause_end),
+                )
 
-        sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
-        pauses = db.execute("SELECT * FROM PAUSES").fetchall()
+            db.commit()
 
-    return jsonify({
-        "sessions": sessions,
-        "pauses": pauses,
-    }), 201
+            sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
+            pauses = db.execute("SELECT * FROM PAUSES").fetchall()
+        finally:
+            db.close()
+
+        return jsonify({
+            "sessions": sessions,
+            "pauses": pauses,
+        }), 201
+        
+    elif request.method == "GET":
+        db = sqlite3.connect(database_path)
+        try:
+            sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
+            pauses = db.execute("SELECT * FROM PAUSES").fetchall()
+        finally:
+            db.close()
+
+        return jsonify({
+            "sessions": sessions,
+            "pauses": pauses,
+        })
+
     
 @app.route("/history", methods=["GET"])
 def history():
-    with sqlite3.connect(database_path) as db:
+    db = sqlite3.connect(database_path)
+    try:
         sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
         # Get pauses as well in the future        
+    finally:
+        db.close()
     return render_template("history.html", sessions=sessions)
 
 @app.route("/settings", methods=["GET", "POST"])
