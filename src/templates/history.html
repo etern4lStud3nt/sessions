@@ -1,34 +1,44 @@
 {% extends "layout.html" %}
 
 {% block head %}
-    <title>Session History</title>
+<title>Session History</title>
+<script src="{{ url_for('static', filename='history.js') }}" defer></script>
 {% endblock %}
 
 {% block main %}
-    <div class="main-div">
-        <a href="{{ url_for('home') }}">Back to timer</a>
-        <h1>History</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Session</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Duration</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for session in sessions %}
-                <tr>
-                    <td>{{ session[0] }}</td>
-                    <td>{{ session[1] }}</td>
-                    <td>{{ session[2] | get_natural_date }}</td>
-                    <td>{{ session[3] | get_natural_date }}</td>
-                    <td>{{ (session[2] ~ "," ~ session[3]) | get_date_diff }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="main-div">
+    <a href="{{ url_for('home') }}">Back to timer</a>
+    <h1>History</h1>
+
+    <h2>Calendar</h2>
+    <form action="/history" method="GET">
+        <label for="date">Select Date:</label>
+        <input type="date" name="date" id="date">
+        <button type="submit" id="search-button">Search</button>
+    </form>
+
+    <h2>Search Results</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Session</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr>
+                <td>{{ session[0] }}</td>
+                <td>{{ session[1] }}</td>
+                <td>{{ session[2] | get_natural_date }}</td>
+                <td>{{ session[3] | get_natural_date }}</td>
+                <td>{{ (session[2] ~ "," ~ session[3]) | get_date_diff }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

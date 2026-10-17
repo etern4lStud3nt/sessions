@@ -100,17 +100,32 @@ def sessions():
             "sessions": sessions,
             "pauses": pauses,
         })
-
     
 @app.route("/history", methods=["GET"])
 def history():
-    db = sqlite3.connect(database_path)
-    try:
-        sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
-        # Get pauses as well in the future        
-    finally:
-        db.close()
-    return render_template("history.html", sessions=sessions)
+    # Get form search data
+    searchedDate = request.values.get("date")
+    if not searchedDate:
+        return render_template("history.html")
+    else:
+        # Get only the dd/mm/yyyy part of the date
+        searchedDate = searchedDate.split("T", 1)[0]
+        
+        # Connect to the database and get relevant sessions
+        db = sqlite3.connect(database_path)
+        try:
+            sessions = db.execute(
+                """
+                SELECT * FROM SESSIONS
+                WHERE date(start_time) = ?
+                OR date(end_time) = ?
+                """,
+                (searchedDate, searchedDate),
+            ).fetchall()
+            # Get pauses as well in the future        
+        finally:
+            db.close()
+        return render_template("history.html", sessions=sessions)
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
