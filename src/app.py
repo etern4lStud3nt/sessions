@@ -1,12 +1,13 @@
 from pathlib import Path
 from flask import Flask, jsonify, render_template, request, redirect
-from utils.jinja_filters import get_date_diff, get_natural_date
+from utils.jinja_filters import get_date_diff, get_natural_date, format_hour
 import sqlite3
 
 
 app = Flask(__name__)
 app.jinja_env.filters["get_date_diff"] = get_date_diff
 app.jinja_env.filters["get_natural_date"] = get_natural_date
+app.jinja_env.filters["format_hour"] = format_hour
 
 database_path = Path("data/sessions.db")
 database_path.parent.mkdir(parents=True, exist_ok=True)
@@ -105,8 +106,15 @@ def sessions():
 def history():
     # Get form search data
     searchedDate = request.values.get("date")
+    
+    # If searched date was not found, show all logged sessions
     if not searchedDate:
-        return render_template("history.html")
+        db = sqlite3.connect(database_path)
+        try:
+            sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
+            # Get pauses as well in the future        
+        finally:
+            db.close()
     else:
         # Get only the dd/mm/yyyy part of the date
         searchedDate = searchedDate.split("T", 1)[0]
@@ -117,15 +125,15 @@ def history():
             sessions = db.execute(
                 """
                 SELECT * FROM SESSIONS
-                WHERE date(start_time) = ?
-                OR date(end_time) = ?
+                WHERE date(?) BETWEEN date(start_time) AND date(end_time)
                 """,
-                (searchedDate, searchedDate),
+                (searchedDate,)
             ).fetchall()
             # Get pauses as well in the future        
         finally:
             db.close()
-        return render_template("history.html", sessions=sessions)
+            
+    return render_template("history.html", sessions=sessions)
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():

@@ -45,5 +45,9 @@ def get_natural_date(date_input : str) -> str:
     
     date_input = parse_js_date(date_input)
     return date_input.strftime("%d %B %Y, %H:%M")
+
+def format_hour(hour : str) -> str:
+    """Takes an hour input (e.g., 1, 2, '4') and returns it in 24-hour hh:00 format."""
+    return f"{int(hour):02d}:00"
     
     
