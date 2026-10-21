@@ -1,5 +1,5 @@
 import Session from "./session.js";
-import { getDuration } from "./durations.js";
+import { getDuration } from "./duration-settings.js";
 
 /** The highest session index in a set. */
 const maxIndex = 3;
@@ -51,23 +51,19 @@ async function logSession()
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(
                 {
-                    sessionStartTime: session.startTime,
-                    sessionEndTime: session.endTime,
-                    session: session.type,
-                    sessionPauseLogs: session.pauseLogs
+                    start_date: session.startTime,
+                    end_date: session.endTime,
+                    type: session.type,
                 }
             )
         });
 
         if (!response.ok)
             throw new Error(`Session log request failed: ${response.status}`);
-
-        const loggedData = await response.json();
-
-        console.log("Logged data:", loggedData);
     }
     catch (error)
     {
+        console.log("Error posting to /sessions.");
         console.error(error);
     }
 }

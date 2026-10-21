@@ -1,6 +1,6 @@
-import { getSavedDurations, saveDurations } from "./durations.js";
+import { getSavedDurations, saveDurations } from "./duration-settings.js";
 
-let submitButton = document.getElementById("submit");
+let form = document.getElementById("settings-form");
 
 let inputFocusMin = document.getElementById("focus-duration-min");
 let inputFocusSec = document.getElementById("focus-duration-sec");
@@ -14,12 +14,16 @@ inputBreakMin.value = Math.floor(savedDurations.break / 60);
 inputBreakSec.value = savedDurations.break % 60;
 
 
-submitButton.addEventListener("click", saveSettings);
+form.addEventListener("submit", handleFormSubmission);
 
-function saveSettings()
+function handleFormSubmission(event)
 {
+    event.preventDefault();
+
     saveDurations({
         focus: Number(inputFocusMin.value) * 60 + Number(inputFocusSec.value),
         break: Number(inputBreakMin.value) * 60 + Number(inputBreakSec.value)
     });
+
+    form.submit();
 }

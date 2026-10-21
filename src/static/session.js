@@ -13,7 +13,6 @@ export default class Session
     #eventTarget;
 
     #type;
-    #pauseLogs;
     #startTime;
     #endTime;
 
@@ -29,7 +28,6 @@ export default class Session
         this.#timer = new Timer(this.#duration);
         this.#state = "NOT_STARTED"
         this.#eventTarget = new EventTarget();
-        this.#pauseLogs = [];
         this.#startTime = null;
         this.#endTime = null;
     }
@@ -76,12 +74,6 @@ export default class Session
         return this.#endTime;
     }
 
-    /** @returns {Array<[Date, Date|null]>} The session pause intervals. */
-    get pauseLogs()
-    {
-        return this.#pauseLogs;
-    }
-
     /** Starts the session if it has not already started. */
     start()
     {
@@ -100,31 +92,15 @@ export default class Session
     }
 
     /** Pauses a running session and records the pause interval. */
-    pause(log = true)
+    pause()
     {
         if (this.#state !== "RUNNING")
             return;
 
         this.#timer.pause();
-        if (log)
-            this.#pauseLogs.push([new Date(), null]);
         this.#state = "PAUSED";
 
         this.#eventTarget.dispatchEvent(new Event("update"));
-    }
-
-    /** Closes the most recent pause interval with the current time. */
-    closePauseInterval()
-    {
-        const lastEntry = this.#pauseLogs.at(-1);
-        // If interval is already closed, return
-        if (lastEntry?.[1] != null)
-            return;
-        // Otherwise, close it
-        if (lastEntry?.[0] != null)
-        {
-            lastEntry[1] = new Date();
-        }
     }
 
     /** Resumes a paused session and completes its latest pause interval. */
@@ -134,7 +110,6 @@ export default class Session
             return;
 
         this.#timer.start();
-        this.closePauseInterval();
         this.#state = "RUNNING";
 
         this.#eventTarget.dispatchEvent(new Event("update"));
@@ -143,8 +118,7 @@ export default class Session
     /** Stops the session, closes any pause interval, and records its end time. */
     stop()
     {
-        this.closePauseInterval();
-        this.#timer.pause();
+        this.pause();
         this.#endTime = new Date();
         this.#state = "STOPPED";
 
@@ -156,7 +130,6 @@ export default class Session
     {
         this.#timer.reset();
         this.#state = "NOT_STARTED";
-        this.#pauseLogs = [];
         this.#startTime = null;
         this.#endTime = null;
 
