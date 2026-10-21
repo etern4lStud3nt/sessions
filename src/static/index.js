@@ -41,7 +41,6 @@ function handleStopButtonClick()
 function handleResetButtonClick()
 {
     app.resetSet();
-
     updateDisplay();
 }
 

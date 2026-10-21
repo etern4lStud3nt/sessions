@@ -110,6 +110,8 @@ function stopSet()
 /** Replaces the active session with a new focus session. */
 function resetSet()
 {
+    session.reset();
+    
     index = 0;
     session = createSession("focus");
 }
