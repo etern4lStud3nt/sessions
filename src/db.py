@@ -15,9 +15,9 @@ def create_table():
             CREATE TABLE IF NOT EXISTS SESSIONS (
                 id INTEGER PRIMARY KEY,
                 type TEXT NOT NULL
-                    CHECK (type IN ('focus', 'break', 'pause')),
-                start_time TEXT NOT NULL,
-                end_time TEXT NOT NULL
+                CHECK (type IN ('focus', 'break')),
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL
             )
             """
         )
@@ -48,13 +48,28 @@ def get_sessions(date: str = None):
 
     return sessions
 
+def get_latest_sessions(amount):
+    db = _connect()
+    try:
+        sessions = db.execute(
+            """
+            SELECT * FROM SESSIONS
+            ORDER BY end_date DESC
+            LIMIT ?
+            """
+        , (amount,)).fetchall()
+    finally:
+        db.close()
+        
+    return sessions
+    
 
 def add_session(session: dict):
     db = _connect()
     try:
         db.execute(
             """
-            INSERT INTO SESSIONS (type, start_time, end_time)
+            INSERT INTO SESSIONS (type, start_date, end_date)
             VALUES (?, ?, ?)
             RETURNING id
             """,
@@ -74,7 +89,6 @@ def delete_sessions():
     db = _connect()
     try:
         # Delete child records before parent records.
-        db.execute("DELETE FROM PAUSES")
         db.execute("DELETE FROM SESSIONS")
         db.commit()
     except Exception:
