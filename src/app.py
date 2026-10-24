@@ -22,7 +22,7 @@ def render_index():
 @app.route("/history", endpoint="history", methods=["GET"])
 def render_history():
     searched_date = request.values.get("date")
-    sessions = db.get_sessions(searched_date)
+    sessions = db.get_latest_sessions(10)
     print("passing" + str(sessions))
     return render_template("history.html", sessions=sessions)
 
