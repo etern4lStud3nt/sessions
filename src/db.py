@@ -16,8 +16,8 @@ def create_table():
                 id INTEGER PRIMARY KEY,
                 type TEXT NOT NULL
                 CHECK (type IN ('focus', 'break')),
-                start_date TEXT NOT NULL,
-                end_date TEXT NOT NULL
+                start_timestamp TEXT NOT NULL,
+                end_timestamp TEXT NOT NULL
             )
             """
         )
@@ -38,7 +38,7 @@ def get_sessions(date: str = None):
             sessions = db.execute(
                 """
                 SELECT * FROM SESSIONS
-                WHERE date(?) BETWEEN date(start_date) AND date(end_date)
+                WHERE date(?) BETWEEN date(start_timestamp) AND date(end_timestamp)
                 """
             , (date,)).fetchall()
     except:
@@ -54,7 +54,7 @@ def get_latest_sessions(amount):
         sessions = db.execute(
             """
             SELECT * FROM SESSIONS
-            ORDER BY end_date DESC
+            ORDER BY end_timestamp DESC
             LIMIT ?
             """
         , (amount,)).fetchall()
@@ -69,11 +69,11 @@ def add_session(session: dict):
     try:
         db.execute(
             """
-            INSERT INTO SESSIONS (type, start_date, end_date)
+            INSERT INTO SESSIONS (type, start_timestamp, end_timestamp)
             VALUES (?, ?, ?)
             RETURNING id
             """,
-            (session["type"], session["start_date"], session["end_date"],)).fetchone()[0]
+            (session["type"], session["start_timestamp"], session["end_timestamp"],)).fetchone()[0]
         db.commit()
         fetched_sessions = db.execute("SELECT * FROM SESSIONS").fetchall()
         

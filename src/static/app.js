@@ -51,8 +51,8 @@ async function logSession()
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(
                 {
-                    start_date: session.startTime,
-                    end_date: session.endTime,
+                    start_timestamp: session.startTimestamp,
+                    end_timestamp: session.endTimestamp,
                     type: session.type,
                 }
             )

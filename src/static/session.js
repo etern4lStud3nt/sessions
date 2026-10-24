@@ -13,8 +13,8 @@ export default class Session
     #eventTarget;
 
     #type;
-    #startTime;
-    #endTime;
+    #startTimestamp;
+    #endTimestamp;
 
     /**
      * Creates a session.
@@ -28,8 +28,8 @@ export default class Session
         this.#timer = new Timer(this.#duration);
         this.#state = "NOT_STARTED"
         this.#eventTarget = new EventTarget();
-        this.#startTime = null;
-        this.#endTime = null;
+        this.#startTimestamp = null;
+        this.#endTimestamp = null;
     }
 
     /** @returns {"focus"|"break"} The session type. */
@@ -63,15 +63,15 @@ export default class Session
     }
 
     /** @returns {Date|null} The session start time. */
-    get startTime()
+    get startTimestamp()
     {
-        return this.#startTime;
+        return this.#startTimestamp;
     }
 
     /** @returns {Date|null} The session end time. */
-    get endTime()
+    get endTimestamp()
     {
-        return this.#endTime;
+        return this.#endTimestamp;
     }
 
     /** Starts the session if it has not already started. */
@@ -87,7 +87,7 @@ export default class Session
         this.#timer.eventTarget.addEventListener("finished", this.handleTimerFinished.bind(this));
 
         this.#timer.start();
-        this.#startTime = new Date();
+        this.#startTimestamp = new Date();
         this.#state = "RUNNING";
     }
 
@@ -119,7 +119,7 @@ export default class Session
     stop()
     {
         this.pause();
-        this.#endTime = new Date();
+        this.#endTimestamp = new Date();
         this.#state = "STOPPED";
 
         this.#eventTarget.dispatchEvent(new Event("update"));
@@ -130,8 +130,8 @@ export default class Session
     {
         this.#timer.reset();
         this.#state = "NOT_STARTED";
-        this.#startTime = null;
-        this.#endTime = null;
+        this.#startTimestamp = null;
+        this.#endTimestamp = null;
 
         this.#eventTarget.dispatchEvent(new Event("update"));
     }
@@ -139,7 +139,7 @@ export default class Session
     /** Marks the session finished when its timer reaches zero. */
     handleTimerFinished()
     {
-        this.#endTime = new Date();
+        this.#endTimestamp = new Date();
         this.#state = "FINISHED";
         this.#eventTarget.dispatchEvent(new Event("finished"));
         this.#eventTarget.dispatchEvent(new Event("update"));
