@@ -41,11 +41,10 @@ def get_sessions(date: str = None):
                 WHERE date(?) BETWEEN date(start_timestamp) AND date(end_timestamp)
                 """
             , (date,)).fetchall()
-    except:
-        raise
     finally:
         db.close()
 
+    print("Searched sessions for " + str(date) + ": \n" + str(sessions))
     return sessions
 
 def get_latest_sessions(amount):

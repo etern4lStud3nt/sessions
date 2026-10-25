@@ -33,6 +33,16 @@ button:active
     transform: translateY(0px) scale(0.97);
 }
 
+button.danger
+{
+    border-color: crimson;
+}
+
+button.confirmation
+{
+    border-color: seagreen;
+}
+
 fieldset
 {
     display: flex;
@@ -113,6 +123,50 @@ th, td
     opacity: 1;
 }
 
+.focus
+{
+    background-color: deepskyblue;
+}
+
+.break
+{
+    background-color: orange;
+}
+
+.calendar
+{
+    display: grid;
+    justify-content: stretch;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    height: 2000px;
+    padding: 5px;
+    
+    border: 2px solid black;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.calendar > .hour-block
+{
+    position: relative;
+    border: 2px dashed black;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.wrapper
+{
+    position: absolute;
+    width: 100%;
+    z-index: -1;
+}
+
+.hidden
+{
+    display: none;
+}
+
 .main-div
 {
     display: flex;
@@ -162,12 +216,3 @@ th, td
     font-size: xx-large;
 }
 
-button.danger
-{
-    border-color: crimson;
-}
-
-button.confirmation
-{
-    border-color: seagreen;
-}

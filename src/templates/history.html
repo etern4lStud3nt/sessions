@@ -2,6 +2,7 @@
 
 {% block head %}
 <title>Session History</title>
+<script src="{{ url_for('static', filename='history.js') }}" defer></script>
 {% endblock %}
 
 {% block main %}
@@ -9,26 +10,54 @@
     <a href="{{ url_for('home') }}">Back to timer</a>
     <h1>History</h1>
 
-    <h2>Latest</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Session</th>
-                <th>Start</th>
-                <th>End</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for session in sessions %}
-            <tr>
-                <td>{{ session[0] }}</td>
-                <td>{{ session[1] }}</td>
-                <td>{{ session[2] | get_natural_date }}</td>
-                <td>{{ session[3] | get_natural_date }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div>
+        <h2>Search</h2>
+        <form action="/sessions/search" method="GET" id="search-form">
+            <label for="search-date-input">Date:</label>
+            <input type="date" name="search-date-input" id="search-date-input">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="hidden" id="calendar-container">
+        <h2 id="calendar-title"></h2>
+        <div class="calendar" id="calendar">
+
+        </div>
+    </div>
+
+    <div>
+        <h2>Latest</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Session</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>{{ session[0] }}</td>
+                    <td>{{ session[1] }}</td>
+                    <td>{{ session[2] | get_natural_date }}</td>
+                    <td>{{ session[3] | get_natural_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+</div>
+
+<template id="hour-block-template">
+    <div class="hour-block">
+        <span class="text-span" style="position: absolute; top: 2px; left: 5px;"></span>
+        <div class="wrapper"></div>
+    </div>
+</template>
+
 {% endblock %}
+

@@ -18,7 +18,6 @@ db.create_table()
 def render_index():
     return render_template("index.html")
 
-
 @app.route("/history", endpoint="history", methods=["GET"])
 def render_history():
     searched_date = request.values.get("date")
@@ -26,24 +25,26 @@ def render_history():
     print("passing" + str(sessions))
     return render_template("history.html", sessions=sessions)
 
-
 @app.route("/settings", endpoint="settings", methods=["GET"])
 def render_settings():
     return render_template("settings.html")
 
-
 @app.route("/sessions", methods=["GET"])
-def get_sessions(date=None):
-    sessions = db.get_sessions(date)
+def get_sessions():
+    sessions = db.get_sessions()
     return jsonify(sessions)
 
+@app.route("/sessions/search", methods=["GET"])
+def search_sessions():
+    date = request.args.get("search-date-input")
+    sessions = db.get_sessions(date)
+    return jsonify(sessions)
 
 @app.route("/sessions", methods=["POST"])
 def create_session():
     session = request.get_json()
     db.add_session(session)
     return "Success", 204
-
 
 @app.route("/sessions", methods=["DELETE"])
 def delete_all_sessions():
