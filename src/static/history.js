@@ -37,125 +37,158 @@ async function handleFormSubmission(event)
 // Orchestrate rendering the 24-hour day calendar view
 function renderDayCalendar(dayDate, daySessions)
 {
-    const calendar = document.getElementById("calendar");
-    calendar.innerHTML = "";
-
-    const header = document.getElementById("calendar-title");
-    header.textContent = dayDate;
-
-    const { dayStartDateTime, dayEndDateTime } = getDayBounds(dayDate);
-    const clampedSessions = clampSessionsToDay(daySessions, dayStartDateTime, dayEndDateTime);
-
-    const hourBlockTemplate = document.getElementById("hour-block-template");
-    const calendarFragment = document.createDocumentFragment();
-
-    for (let index = 0; index < 24; index++)
-    {
-        const hourBlockFragment = createHourBlockFragment(
-            index, 
-            dayStartDateTime, 
-            clampedSessions, 
-            hourBlockTemplate
-        );
-        calendarFragment.appendChild(hourBlockFragment);
-    }
-
-    calendar.appendChild(calendarFragment);
+    reset();
+    renderHourBlocks();
     showCalendarContainer();
 
-    // --- Agnostic Local Helper Functions ---
-
-    // Calculate start and end Date objects for the given day
-    function getDayBounds(dateString)
+    function reset()
     {
-        const start = new Date(dateString);
-        start.setHours(0, 0, 0, 0);
+        calendar.innerHTML = "";
 
-        const end = new Date(dateString);
-        end.setHours(23, 59, 59, 999);
-
-        return { dayStartDateTime: start, dayEndDateTime: end };
+        const header = document.getElementById("calendar-title");
+        header.textContent = dayDate;
     }
 
-    // Clamp session boundaries to fit within the active day
-    function clampSessionsToDay(sessions, startDateTime, endDateTime)
+    function renderHourBlocks()
     {
-        const clamped = [];
+        // Create a calendar fragment
+        const calendarFragment = document.createDocumentFragment();
 
-        // Process each session's temporal bounds
-        for (const session of sessions)
+        // Generate hour block fragments and add them to the calendar fragment
+        const hourBlockFragments = generateHourBlockFragments();
+        for (const hourBlockFragment of hourBlockFragments)
         {
-            let sessionStartDateTime = new Date(session.start);
-            let sessionEndDateTime = new Date(session.end);
-
-            // Constrain session limits to day boundaries
-            if (sessionStartDateTime < startDateTime)
-                sessionStartDateTime = new Date(startDateTime);
-            if (sessionEndDateTime > endDateTime)
-                sessionEndDateTime = new Date(endDateTime);
-
-            clamped.push({
-                startDateTime: sessionStartDateTime,
-                endDateTime: sessionEndDateTime,
-                type: session.type
-            });
+            calendarFragment.appendChild(hourBlockFragment);
         }
 
-        return clamped;
-    }
+        // Add the calendar fragment to the document's calendar div and render it
+        const calendarDiv = document.getElementById("calendar");
+        calendarDiv.appendChild(calendarFragment);
 
-    // Build a single hour block fragment with its overlapping session segments
-    function createHourBlockFragment(hourIndex, startDateTime, sessions, template)
-    {
-        // Clone and configure the base hour block element
-        const hourBlockFragment = template.content.cloneNode(true);
-
-        const hourBlockTextSpan = hourBlockFragment.querySelector(".text-span");
-        hourBlockTextSpan.textContent = `${hourIndex.toString().padStart(2, "0")}:00`;
-
-        // Define exact hourly temporal boundaries
-        const hourStartDateTime = new Date(startDateTime);
-        hourStartDateTime.setHours(hourIndex, 0, 0, 0);
-
-        const hourEndDateTime = new Date(startDateTime);
-        hourEndDateTime.setHours(hourIndex, 59, 59, 999);
-
-        const hourBlockDiv = hourBlockFragment.querySelector(".hour-block");
-
-        // Evaluate each session for intersection with this hour block
-        for (const sessionPeriod of sessions)
+        function generateHourBlockFragments()
         {
-            // Skip sessions outside the current hour window
-            if (sessionPeriod.endDateTime <= hourStartDateTime || sessionPeriod.startDateTime >= hourEndDateTime)
+            const blockFragments = [];
+            for (let index = 0; index < 24; index++) 
             {
-                continue;
+                // Create and hour block fragment from template
+                const hourBlockTemplate = document.getElementById("hour-block-template");
+                const hourBlockFragment = hourBlockTemplate.content.cloneNode(true);
+
+                // Set the text displaying this hour block
+                const textSpan = hourBlockFragment.querySelector(".text-span");
+                textSpan.textContent = `${index.toString().padStart(2, "0")}:00`;
+
+                // Add session block fragments from template and append them to the hour block fragment
+                const sessionBlockFragments = generateSessionBlockFragments(index);
+                const hourBlockDiv = hourBlockFragment.querySelector(".hour-block");
+                for (const sessionBlockFragment of sessionBlockFragments)
+                {
+                    hourBlockDiv.appendChild(sessionBlockFragment)
+                }
+
+                // Push fragment to the list
+                blockFragments.push(hourBlockFragment);
             }
 
-            // Determine exact overlap segment within this hour
-            const segmentStartDateTime = sessionPeriod.startDateTime > hourStartDateTime ? sessionPeriod.startDateTime : hourStartDateTime;
-            const segmentEndDateTime = sessionPeriod.endDateTime < hourEndDateTime ? sessionPeriod.endDateTime : hourEndDateTime;
+            return blockFragments;
 
-            // Calculate positional offsets in seconds from the start of the hour
-            const startSecondsIntoHour = segmentStartDateTime.getMinutes() * 60 + segmentStartDateTime.getSeconds();
-            const endSecondsIntoHour = segmentEndDateTime.getMinutes() * 60 + segmentEndDateTime.getSeconds();
 
-            // Convert offsets into percentage-based layout styles
-            const topPercent = (startSecondsIntoHour / 3600) * 100;
-            const heightPercent = Math.max(((endSecondsIntoHour - startSecondsIntoHour) / 3600) * 100, 1);
+            function generateSessionBlockFragments(hourIndex)
+            {
+                const { dayStartDateTime, dayEndDateTime } = getDayBounds(dayDate);
+                const { hourStartDateTime, hourEndDateTime } = getHourBounds();
+                const clampedSessions = clampSessionsToDay(daySessions, dayStartDateTime, dayEndDateTime);
 
-            // Create and append the session segment element
-            const sessionElement = document.createElement("div");
-            sessionElement.className = `wrapper ${sessionPeriod.type}`;
-            sessionElement.style.top = `${topPercent}%`;
-            sessionElement.style.height = `${heightPercent}%`;
+                const generatedFragments = [];
+                // Evaluate each session for intersection with this hour block
+                for (const clampedSession of clampedSessions)
+                {
+                    // Skip sessions outside the current hour window
+                    if (clampedSession.endDateTime <= hourStartDateTime || clampedSession.startDateTime >= hourEndDateTime)
+                    {
+                        continue;
+                    }
 
-            hourBlockDiv.appendChild(sessionElement);
+                    // Determine exact overlap segment within this hour
+                    const blockStartDateTime = clampedSession.startDateTime > hourStartDateTime ? clampedSession.startDateTime : hourStartDateTime;
+                    const blockEndDatetime = clampedSession.endDateTime < hourEndDateTime ? clampedSession.endDateTime : hourEndDateTime;
+
+                    // Calculate positional offsets in seconds from the start of the hour
+                    const startSecondsIntoHour = blockStartDateTime.getMinutes() * 60 + blockStartDateTime.getSeconds();
+                    const endSecondsIntoHour = blockEndDatetime.getMinutes() * 60 + blockEndDatetime.getSeconds();
+
+                    // Calculate position and height relative to parent element
+                    const topPercent = (startSecondsIntoHour / 3600) * 100;
+                    const heightPercent = Math.max(((endSecondsIntoHour - startSecondsIntoHour) / 3600) * 100, 1);
+
+                    // Create fragment from template
+                    const wrapperTemplate = document.getElementById("wrapper-template");
+                    const wrapperFragment = wrapperTemplate.content.cloneNode(true);
+
+                    // Add style to 
+                    const wrapperDiv = wrapperFragment.querySelector(".wrapper");
+                    wrapperDiv.style.top = `${topPercent}%`;
+                    wrapperDiv.style.height = `${heightPercent}%`;
+                    wrapperDiv.classList.add(clampedSession.type);
+
+                    generatedFragments.push(wrapperFragment);
+                }
+
+                return generatedFragments;
+
+
+                function getHourBounds()
+                {
+                    const hourStartDateTime = new Date(dayDate);
+                    hourStartDateTime.setHours(hourIndex, 0, 0, 0);
+
+                    const hourEndDateTime = new Date(dayDate);
+                    hourEndDateTime.setHours(hourIndex, 59, 59, 999);
+                    return { hourStartDateTime, hourEndDateTime };
+                }
+
+                // Calculate start and end Date objects for the given day
+                function getDayBounds(dateString)
+                {
+                    const start = new Date(dateString);
+                    start.setHours(0, 0, 0, 0);
+
+                    const end = new Date(dateString);
+                    end.setHours(23, 59, 59, 999);
+
+                    return { dayStartDateTime: start, dayEndDateTime: end };
+                }
+
+                // Clamp session boundaries to fit within the active day
+                function clampSessionsToDay(sessions, startDateTime, endDateTime)
+                {
+                    const clamped = [];
+
+                    // Process each session's temporal bounds
+                    for (const session of sessions)
+                    {
+                        let sessionStartDateTime = new Date(session.start);
+                        let sessionEndDateTime = new Date(session.end);
+
+                        // Constrain session limits to day boundaries
+                        if (sessionStartDateTime < startDateTime)
+                            sessionStartDateTime = new Date(startDateTime);
+                        if (sessionEndDateTime > endDateTime)
+                            sessionEndDateTime = new Date(endDateTime);
+
+                        clamped.push({
+                            startDateTime: sessionStartDateTime,
+                            endDateTime: sessionEndDateTime,
+                            type: session.type
+                        });
+                    }
+
+                    return clamped;
+                }
+            }
         }
-
-        return hourBlockFragment;
     }
 
-    // Reveal the main calendar container element
     function showCalendarContainer()
     {
         const calendarContainer = document.getElementById("calendar-container");
