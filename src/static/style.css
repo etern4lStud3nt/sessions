@@ -139,16 +139,17 @@ th, td
     justify-content: stretch;
     grid-template-columns: 1fr;
     gap: 5px;
-    height: 2000px;
+    height: 50vh;
     padding: 5px;
     
     border: 2px solid black;
-    overflow: hidden;
+    overflow: auto;
     border-radius: 5px;
 }
 
 .calendar > .hour-block
 {
+    min-height: 50px;
     position: relative;
     border: 2px dashed black;
     border-radius: 5px;

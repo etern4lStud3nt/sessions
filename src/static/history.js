@@ -1,4 +1,5 @@
 const searchForm = document.getElementById("search-form");
+const calendar = document.getElementById("calendar");
 
 searchForm.addEventListener("submit", handleFormSubmission);
 
@@ -193,5 +194,9 @@ function renderDayCalendar(dayDate, daySessions)
     {
         const calendarContainer = document.getElementById("calendar-container");
         calendarContainer.classList.remove("hidden");
+
+        // Scroll calendar to the center
+        const middle = (calendar.scrollHeight - calendar.clientHeight) / 2;
+        calendar.scrollTop = middle;
     }
 }
