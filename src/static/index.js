@@ -7,13 +7,22 @@ const resetButton = document.getElementById("reset-button");
 const display = document.getElementById("display");
 const progressBubbles = document.getElementById("progress-bubbles");
 
-// Event listeners for Start, Stop, Reset buttons and app updates
+// Notification elements
+const notificationsBanner = document.getElementById("notifications-banner");
+const dismissNotificationButton = document.getElementById("dismiss-notification");
+
+// Event listeners for Start, Stop, Reset buttons
 startButton.addEventListener("click", handleStartButtonClick);
 stopButton.addEventListener("click", handleStopButtonClick);
 resetButton.addEventListener("click", handleResetButtonClick);
+
+// Event listener for the notifications message
+dismissNotificationButton.addEventListener("click", hideNotificationsMessage);
+
 app.eventTarget.addEventListener("update", updateDisplay);
 
 updateDisplay();
+checkNotificationPermission();
 
 /** Starts the first session or toggles pause/resume for an active session. */
 function handleStartButtonClick()
@@ -44,6 +53,18 @@ function handleResetButtonClick()
     updateDisplay();
 }
 
+/** Shows the notifications disabled message. */
+function showNotificationsMessage()
+{
+    notificationsBanner.classList.remove("hidden");
+}
+
+/** Hides the notifications disabled message. */
+function hideNotificationsMessage()
+{
+    notificationsBanner.classList.add("hidden");
+}
+
 /** Refreshes every timer, button, and progress indicator on the page. */
 function updateDisplay()
 {
@@ -63,7 +84,8 @@ function updateDisplay()
     /** Updates the start button label for the current session state. */
     function updateStartButton()
     {
-        switch (app.session.state) {
+        switch (app.session.state)
+        {
             case "NOT_STARTED":
                 startButton.textContent = "Start";
                 break;
@@ -102,5 +124,20 @@ function updateDisplay()
 
             progressBubbles.appendChild(sessionBubble);
         }
+    }
+}
+
+/** Checks the browser notification permission and updates the banner visibility. */
+function checkNotificationPermission()
+{
+    if (Notification.permission === "granted")
+    {
+        // If the user enabled notifications, hide the banner automatically
+        hideNotificationsMessage();
+    }
+    else if (Notification.permission === "denied")
+    {
+        // If notifications are blocked/denied, show the banner
+        showNotificationsMessage();
     }
 }

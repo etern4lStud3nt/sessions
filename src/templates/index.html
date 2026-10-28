@@ -7,15 +7,20 @@
 
 {% block main %}
 <div class="main-div">
-        <h1>Sessions</h1>
-        <div class="timer">
-            <div id="display"></div>
-            <div id="progress-bubbles" class="progress-bubbles" aria-label="Session progress"></div>
-            <button id="start-button">Start</button>
-            <button id="stop-button" class="confirmation">Stop</button>
-            <button id="reset-button" class="danger">Reset</button>
-        </div>
-        <a href="{{ url_for('history') }}">View session history</a>
-        <a href="{{ url_for('settings') }}">Settings</a>
+    <h1>Sessions</h1>
+    <div class="timer">
+        <div id="display"></div>
+        <div id="progress-bubbles" class="progress-bubbles" aria-label="Session progress"></div>
+        <button id="start-button">Start</button>
+        <button id="stop-button" class="confirmation">Stop</button>
+        <button id="reset-button" class="danger">Reset</button>
     </div>
+    <!-- Notifications Disabled Banner -->
+    <div id="notifications-banner" class="notification-banner" role="status">
+        <span>⚠️ Notifications are disabled. You won't get alerts when sessions end.</span>
+        <button id="dismiss-notification" aria-label="Dismiss notification">&times;</button>
+    </div>
+    <a href="{{ url_for('history') }}">View session history</a>
+    <a href="{{ url_for('settings') }}">Settings</a>
+</div>
 {% endblock %}

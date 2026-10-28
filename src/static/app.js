@@ -10,6 +10,10 @@ let session = createSession("focus");
 /** Emits updates whenever the active session changes. */
 let eventTarget = new EventTarget();
 
+if (Notification.permission === "default")
+{
+    Notification.requestPermission();
+}
 
 /**
  * Creates a new session and adds event listeners
@@ -73,28 +77,36 @@ function handleSessionFinished()
 {
     void logSession();
 
-
     // If the set hasn't finished, move to the next session
     if (index < maxIndex)
     {
         if (session.type === "break")
         {
+            Notify("Time to focus!", "Break session finished");
             session = createSession("focus");
             index += 1;
         }
         else if (session.type === "focus")
+        {
+            Notify("Time for a break!", "Focus session finished");
+
             session = createSession("break")
+        }
     }
     // If a session with maxIndex finished, reset
     else
     {
         if (session.type === "break")
         {
-            alert("Congratulations, you completed all sessions in this Set!")
+            Notify("Break Session finished", "Congratulations, you just completed a whole Set!");
+
             resetSet();
         }
         else if (session.type === "focus")
+        {
             session = createSession("break")
+            Notify("Focus Session Finished!", "That was you last focus session, let's take a break!");
+        }
     }
 }
 
@@ -111,9 +123,21 @@ function stopSet()
 function resetSet()
 {
     session.reset();
-    
+
     index = 0;
     session = createSession("focus");
+}
+
+/**
+ * Sends a system notification to the user
+ * @param {string} title The title of the notification
+ * @param {string} text The body of the notification
+ */
+function Notify(title, text)
+{
+    var audio = new Audio('/static/audio/notification.wav');
+    audio.play();
+    new Notification(title, { body: text });
 }
 
 export
