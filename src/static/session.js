@@ -1,35 +1,28 @@
-import Timer from './timer.js';
-const FOCUS_DURATION = 3;//25 * 60;
-const BREAK_DURATION = 2;//5 * 60;
-
 /**
  * Represents a focus or break session managed by a countdown timer.
  */
 export default class Session
 {
-    #timer;
     #duration;
     #state
     #eventTarget;
-
+    #intervalID;
     #type;
-    #startTimestamp;
-    #endTimestamp;
+    /** @type {[Date, Date|null][]} A list of pairs containing two Date objects. */
+    #periods;
 
     /**
      * Creates a session.
      * @param {"focus"|"break"} type The type of session to create.
-    * @param {number} duration The session duration in seconds.
+     * @param {number} duration The session duration in seconds.
      */
     constructor(type, duration)
     {
         this.#type = type;
         this.#duration = duration;
-        this.#timer = new Timer(this.#duration);
         this.#state = "NOT_STARTED"
         this.#eventTarget = new EventTarget();
-        this.#startTimestamp = null;
-        this.#endTimestamp = null;
+        this.#periods = [];
     }
 
     /** @returns {"focus"|"break"} The session type. */
@@ -47,7 +40,19 @@ export default class Session
     /** @returns {number} The remaining time in seconds. */
     get remaining()
     {
-        return this.#timer.remaining;
+        let remaining = this.#duration;
+        for (const period of this.#periods)
+        {
+            let start = period[0];
+            let end = period[1];
+            if (period[1] == null)
+                end = new Date();
+
+            const diff = (end - start) / 1000;
+            remaining -= diff;
+        }
+
+        return Math.round(remaining);
     }
 
     /** @returns {EventTarget} The target used for session events. */
@@ -65,13 +70,24 @@ export default class Session
     /** @returns {Date|null} The session start time. */
     get startTimestamp()
     {
-        return this.#startTimestamp;
+        return this.#periods.at(0)[0];
     }
 
     /** @returns {Date|null} The session end time. */
     get endTimestamp()
     {
-        return this.#endTimestamp;
+        return this.#periods.at(-1)[1];
+    }
+
+    setCheckInterval()
+    {
+        this.#intervalID = setInterval(this.checkState.bind(this), 1000);
+    }
+
+    clearCheckInterval()
+    {
+        clearInterval(this.#intervalID);
+        this.#intervalID = null;
     }
 
     /** Starts the session if it has not already started. */
@@ -80,14 +96,8 @@ export default class Session
         if (this.#state !== "NOT_STARTED")
             return;
 
-        this.#timer.eventTarget.addEventListener("tick", () =>
-        {
-            this.#eventTarget.dispatchEvent(new Event("update"));
-        });
-        this.#timer.eventTarget.addEventListener("finished", this.handleTimerFinished.bind(this));
-
-        this.#timer.start();
-        this.#startTimestamp = new Date();
+        this.setCheckInterval();
+        this.#periods.push([new Date(), null]);
         this.#state = "RUNNING";
     }
 
@@ -97,7 +107,8 @@ export default class Session
         if (this.#state !== "RUNNING")
             return;
 
-        this.#timer.pause();
+        this.clearCheckInterval();
+        this.#periods.at(-1)[1] = new Date();
         this.#state = "PAUSED";
 
         this.#eventTarget.dispatchEvent(new Event("update"));
@@ -109,7 +120,8 @@ export default class Session
         if (this.#state !== "PAUSED")
             return;
 
-        this.#timer.start();
+        this.setCheckInterval();
+        this.#periods.push([new Date(), null]);
         this.#state = "RUNNING";
 
         this.#eventTarget.dispatchEvent(new Event("update"));
@@ -119,7 +131,7 @@ export default class Session
     stop()
     {
         this.pause();
-        this.#endTimestamp = new Date();
+        this.#periods.at(-1)[1] = new Date();
         this.#state = "STOPPED";
 
         this.#eventTarget.dispatchEvent(new Event("update"));
@@ -128,20 +140,26 @@ export default class Session
     /** Resets the session timer, state, and recorded pause intervals. */
     reset()
     {
-        this.#timer.reset();
+        this.clearCheckInterval();
         this.#state = "NOT_STARTED";
-        this.#startTimestamp = null;
-        this.#endTimestamp = null;
+        this.#periods = [];
 
         this.#eventTarget.dispatchEvent(new Event("update"));
     }
 
-    /** Marks the session finished when its timer reaches zero. */
-    handleTimerFinished()
+    checkState()
     {
-        this.#endTimestamp = new Date();
-        this.#state = "FINISHED";
-        this.#eventTarget.dispatchEvent(new Event("finished"));
         this.#eventTarget.dispatchEvent(new Event("update"));
+        console.log("check");
+
+        if (this.remaining <= 0)
+        {
+            this.clearCheckInterval();
+            this.#periods.at(-1)[1] = new Date();
+            this.#state = "FINISHED";
+            this.#eventTarget.dispatchEvent(new Event("finished"));
+            this.#eventTarget.dispatchEvent(new Event("update"));
+        }
     }
+
 }
