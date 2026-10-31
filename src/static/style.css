@@ -1,16 +1,17 @@
-body
-{
+body {
     display: grid;
     grid-template-columns: auto auto auto;
     height: 100vh;
     justify-content: center;
     align-items: center;
 
-    font-family: 'montserrat', 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-family:
+        "montserrat", "Open Sans", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
-button, input
-{
+button,
+input {
+    justify-items: center;
     font-family: inherit;
     font-size: inherit;
     background-color: transparent;
@@ -19,47 +20,47 @@ button, input
     width: 100%;
     height: 36px;
     box-sizing: border-box;
-    transition: transform 0.1s ease, scale 0.1s ease;
+    transition:
+        transform 0.1s ease,
+        scale 0.1s ease;
 }
 
-button:hover
-{
+input[type="checkbox"] {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+button:hover {
     cursor: pointer;
     transform: translateY(-2px) scale(1.03);
 }
 
-button:active
-{
+button:active {
     transform: translateY(0px) scale(0.97);
 }
 
-button.danger
-{
+button.danger {
     border-color: crimson;
 }
 
-button.confirmation
-{
+button.confirmation {
     border-color: seagreen;
 }
 
-fieldset
-{
+fieldset {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-form
-{
+form {
     gap: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-form input[type="number"]
-{
+form input[type="number"] {
     font-family: inherit;
     font-size: inherit;
     background-color: transparent;
@@ -67,37 +68,27 @@ form input[type="number"]
     border-radius: 5px;
     box-sizing: border-box;
     width: 4em;
-    outline: 2px solid transparent;
-    transition: outline-color 0.3s ease;
 }
 
-form input[type="number"]:focus
-{
-    outline-color: dodgerblue;
-    border-color: dodgerblue;
-}
-
-h1, h2
-{
+h1,
+h2 {
     align-self: flex-start;
 }
 
-table
-{
+table {
     width: max-content;
     max-width: 100%;
     border-collapse: collapse;
 }
 
-th, td
-{
+th,
+td {
     padding: 10px 14px;
     text-align: left;
     white-space: nowrap;
 }
 
-.bubble
-{
+.bubble {
     width: 12px;
     height: 12px;
     border: 2px solid;
@@ -106,49 +97,42 @@ th, td
     opacity: 0.2;
 }
 
-.bubble.break-bubble
-{
+.bubble.break-bubble {
     border-style: dashed;
 }
 
-.bubble.completed
-{
+.bubble.completed {
     background-color: currentColor;
     opacity: 0.45;
 }
 
-.bubble.current
-{
+.bubble.current {
     background-color: currentColor;
     opacity: 1;
 }
 
-.focus
-{
+.focus {
     background-color: deepskyblue;
 }
 
-.break
-{
+.break {
     background-color: orange;
 }
 
-.calendar
-{
+.calendar {
     display: grid;
     justify-content: stretch;
     grid-template-columns: 1fr;
     gap: 5px;
     height: 50vh;
     padding: 5px;
-    
+
     border: 2px solid black;
     overflow: auto;
     border-radius: 5px;
 }
 
-.calendar > .hour-block
-{
+.calendar>.hour-block {
     min-height: 50px;
     position: relative;
     border: 2px dashed black;
@@ -156,28 +140,24 @@ th, td
     overflow: hidden;
 }
 
-.wrapper
-{
+.wrapper {
     position: absolute;
     width: 100%;
     z-index: -1;
 }
 
-.hidden
-{
+.hidden {
     display: none;
 }
 
-.main-div
-{
+.main-div {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 5px;
 }
 
-.main-div > a
-{
+.main-div>a {
     align-self: flex-start;
 }
 
@@ -213,16 +193,14 @@ th, td
     height: auto;
 }
 
-.progress-bubbles
-{
+.progress-bubbles {
     display: flex;
     align-items: center;
     gap: 4px;
     margin-bottom: 5px;
 }
 
-.timer
-{
+.timer {
     display: flex;
     flex-direction: column;
     align-self: center;
@@ -236,16 +214,20 @@ th, td
     box-sizing: border-box;
 }
 
-.setting-row 
-{
+.setting-row {
     display: grid;
-    grid-template-columns: 1fr 4em auto 4em auto;
+    justify-content: start;
+    padding: 10px;
     align-items: center;
     column-gap: 5px;
 }
 
-#display
-{
+.setting-row:hover {
+    outline: 3px solid dodgerblue;
+    border-radius: 5px;
+}
+
+#display {
     margin-bottom: 5px;
     font-size: xx-large;
 }

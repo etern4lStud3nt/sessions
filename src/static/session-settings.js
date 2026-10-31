@@ -3,7 +3,7 @@
  * focus and break durations.
  * @type {string[]}
  */
-const DEFAULT_DURATIONS = ["1500", "300"]
+const DEFAULT_DURATIONS = ["1500", "300"];
 
 /**
  * Retrieves timer durations from local storage.
@@ -40,7 +40,6 @@ function getSavedDurations()
     return durations;
 }
 
-
 /**
  * Saves timer durations to local storage.
  *
@@ -50,8 +49,9 @@ function getSavedDurations()
  */
 function saveDurations(durations)
 {
-    Object.entries(durations).forEach(([key, value]) => {
-        localStorage.setItem(key, value)
+    Object.entries(durations).forEach(([key, value]) =>
+    {
+        localStorage.setItem(key, value);
     });
 }
 
@@ -69,4 +69,15 @@ function getDuration(key)
     return durations[key];
 }
 
-export { getSavedDurations, saveDurations, getDuration }
+function saveAutoSwitchSetting(value)
+{
+    localStorage.setItem("autoSwitch", value);
+}
+
+function getAutoSwitchSetting()
+{
+    let autoSwitch = localStorage.getItem("autoSwitch");
+    return autoSwitch === "true";
+}
+
+export { getSavedDurations, saveDurations, getDuration, getAutoSwitchSetting, saveAutoSwitchSetting };

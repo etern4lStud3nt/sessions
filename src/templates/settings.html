@@ -1,35 +1,34 @@
-{% extends "layout.html" %}
-
-{% block head %}
+{% extends "layout.html" %} {% block head %}
 <title>Settings</title>
 <script type="module" src="{{ url_for('static', filename='settings.js') }}" defer></script>
-{% endblock %}
-
-{% block main %}
+{% endblock %} {% block main %}
 <div class="main-div">
     <h1>Settings</h1>
     <form id="settings-form" action="/settings" method="POST">
         <fieldset>
-            <legend>Session Duration</legend>
-            <div class="setting-row">
+            <legend>Sessions</legend>
+            <div class="setting-row" style="grid-template-columns: 1fr 4em auto 4em auto">
                 <label for="focus-duration-min">Focus Duration</label>
-                <input type="number" name="focus-duration" id="focus-duration-min">
+                <input type="number" name="focus-duration" id="focus-duration-min" />
                 <span>minutes</span>
-                <input type="number" name="focus-duration" id="focus-duration-sec">
+                <input type="number" name="focus-duration" id="focus-duration-sec" />
                 <span>seconds</span>
             </div>
-            <div class="setting-row">
+            <div class="setting-row" style="grid-template-columns: 1fr 4em auto 4em auto">
                 <label for="break-duration-min">Break Duration</label>
-                <input type="number" name="break-duration" id="break-duration-min">
+                <input type="number" name="break-duration" id="break-duration-min" />
                 <span>minutes</span>
-                <input type="number" name="break-duration" id="break-duration-sec">
+                <input type="number" name="break-duration" id="break-duration-sec" />
                 <span>seconds</span>
             </div>
+            <div class="setting-row" style="grid-template-columns: auto auto">
+                <input type="checkbox" name="auto-switch" id="auto-switch" />
+                <label for="auto-switch">Automatically Switch Between Sessions</label>
+            </div>
+            <button type="submit">Save Settings</button>
         </fieldset>
-
-        <button type="submit">Save Settings</button>
     </form>
-    
+
     <fieldset>
         <legend>Danger Zone</legend>
         <div class="setting-row">

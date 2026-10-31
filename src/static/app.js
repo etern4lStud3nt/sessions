@@ -1,5 +1,5 @@
 import Session from "./session.js";
-import { getDuration } from "./duration-settings.js";
+import { getDuration, getAutoSwitchSetting } from "./session-settings.js";
 
 /** The highest session index in a set. */
 const maxIndex = 3;
@@ -92,6 +92,11 @@ function handleSessionFinished()
 
             session = createSession("break")
         }
+
+        if (getAutoSwitchSetting())
+        {
+            session.start();
+        }
     }
     // If a session with maxIndex finished, reset
     else
@@ -106,6 +111,11 @@ function handleSessionFinished()
         {
             session = createSession("break")
             Notify("Focus Session Finished!", "That was you last focus session, let's take a break!");
+
+            if (getAutoSwitchSetting())
+            {
+                session.start();
+            }
         }
     }
 }
